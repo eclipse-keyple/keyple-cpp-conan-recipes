@@ -1,0 +1,87 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b6439e9..6743a5f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,13 +30,18 @@ SET(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+ 
+ SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
+ SET(CMAKE_CXX_STANDARD 11)
++SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ # Compilers
+ SET(CMAKE_C_COMPILER_WORKS 1)
+ SET(CMAKE_CXX_COMPILER_WORKS 1)
+ 
+-IF(NOT TOOLCHAIN_FILE)
+-    MESSAGE(FATAL_ERROR "Toolchain file not specified")
++# Compiler warnings (compiler/OS selection itself is now handled by the
++# Conan profile passed at configure time, see profiles/).
++IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
++    ADD_COMPILE_OPTIONS(-Wall -Wextra -Wdeprecated -Wno-overloaded-virtual -pedantic -pedantic-errors -Werror)
++ELSEIF(MSVC)
++    ADD_COMPILE_OPTIONS(/W4 /WX /EHsc)
+ ENDIF()
+ 
+ # Set common output directory
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 08a2b57..ac4906b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,4 +10,9 @@
+ 
+ # Add projects
+ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/main/)
+-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/test/)
++
++OPTION(BUILD_TESTING "Build the unit tests" ON)
++
++IF(BUILD_TESTING)
++    ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/test/)
++ENDIF()
+diff --git a/src/main/CMakeLists.txt b/src/main/CMakeLists.txt
+index dcb9f26..be9c06e 100755
+--- a/src/main/CMakeLists.txt
++++ b/src/main/CMakeLists.txt
+@@ -48,3 +48,19 @@ ADD_LIBRARY(
+ 
+     ${LIBRARY_NAME}
+ )
++
++INSTALL(
++
++    TARGETS ${LIBRARY_NAME}
++
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin
++)
++
++INSTALL(
++
++    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
++
++    DESTINATION include
++)
+diff --git a/src/test/CMakeLists.txt b/src/test/CMakeLists.txt
+index aa307de..a48bfd6 100644
+--- a/src/test/CMakeLists.txt
++++ b/src/test/CMakeLists.txt
+@@ -25,14 +25,14 @@ ADD_EXECUTABLE(
+     ${CMAKE_CURRENT_SOURCE_DIR}/MainTest.cpp
+ )
+ 
+-# Add Google Test
+-INCLUDE(CMakeLists.txt.googletest)
++# GTest/GMock are supplied by Conan (test_requires) via CMakeDeps
++FIND_PACKAGE(GTest REQUIRED CONFIG)
+ 
+ TARGET_LINK_LIBRARIES(
+ 
+     ${EXECUTABLE_NAME}
+ 
+-    gtest
+-    gmock
++    GTest::gtest
++    GTest::gmock
+     Keyple::Util
+ )

@@ -1,0 +1,122 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bfff4d1..f637a25 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,13 +31,18 @@ SET(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+ 
+ SET(CMAKE_MACOSX_RPATH 1)
+ SET(CMAKE_CXX_STANDARD 11)
++SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ # Compilers
+ SET(CMAKE_C_COMPILER_WORKS 1)
+ SET(CMAKE_CXX_COMPILER_WORKS 1)
+ 
+-IF(NOT TOOLCHAIN_FILE)
+-    MESSAGE(FATAL_ERROR "Toolchain file not specified")
++# Compiler warnings (compiler/OS selection itself is now handled by the
++# Conan profile passed at configure time, see profiles/).
++IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
++    ADD_COMPILE_OPTIONS(-Wall -Wextra -Wdeprecated -Wno-overloaded-virtual -pedantic -pedantic-errors -Werror)
++ELSEIF(MSVC)
++    ADD_COMPILE_OPTIONS(/W4 /WX /EHsc)
+ ENDIF()
+ 
+ # Set common output directory
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 2e37412..af0bf65 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -13,4 +13,9 @@
+ 
+ # Add projects
+ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/main)
+-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
++
++OPTION(BUILD_TESTING "Build the unit tests" ON)
++
++IF(BUILD_TESTING)
++    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
++ENDIF()
+diff --git a/src/main/CMakeLists.txt b/src/main/CMakeLists.txt
+index 855e57f..8fda3f7 100644
+--- a/src/main/CMakeLists.txt
++++ b/src/main/CMakeLists.txt
+@@ -15,16 +15,16 @@ SET(LIBRARY_NAME keyplecardcalypsocpplib)
+ 
+ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKEYPLECARDCALYPSO_EXPORT")
+ 
+-# Include deps
+-INCLUDE("CMakeLists.txt.keyple-card-calypso-crypto-legacysam")
+-INCLUDE("CMakeLists.txt.keyple-common")
+-INCLUDE("CMakeLists.txt.keyple-util")
+-INCLUDE("CMakeLists.txt.keypop-card")
+-INCLUDE("CMakeLists.txt.keypop-reader")
+-INCLUDE("CMakeLists.txt.keypop-calypso-card")
+-INCLUDE("CMakeLists.txt.keypop-calypso-crypto-asymmetric")
+-INCLUDE("CMakeLists.txt.keypop-calypso-crypto-legacysam")
+-INCLUDE("CMakeLists.txt.keypop-calypso-crypto-symmetric")
++# Dependencies are supplied by Conan (requires) via CMakeDeps
++FIND_PACKAGE(keyple-card-calypso-crypto-legacysam-cpp-lib REQUIRED CONFIG)
++FIND_PACKAGE(keyple-common-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keyple-util-cpp-lib REQUIRED CONFIG)
++FIND_PACKAGE(keypop-card-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-reader-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-calypso-card-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-calypso-crypto-asymmetric-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-calypso-crypto-legacysam-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-calypso-crypto-symmetric-cpp-api REQUIRED CONFIG)
+ 
+ ADD_LIBRARY(
+ 
+@@ -130,3 +130,19 @@ ADD_LIBRARY(
+ 
+     ${LIBRARY_NAME}
+ )
++
++INSTALL(
++
++    TARGETS ${LIBRARY_NAME}
++
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin
++)
++
++INSTALL(
++
++    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
++
++    DESTINATION include
++)
+diff --git a/src/test/CMakeLists.txt b/src/test/CMakeLists.txt
+index 06ddb3b..da52fe7 100644
+--- a/src/test/CMakeLists.txt
++++ b/src/test/CMakeLists.txt
+@@ -44,9 +44,10 @@ TARGET_INCLUDE_DIRECTORIES(
+     ${CMAKE_CURRENT_SOURCE_DIR}
+ )
+ 
+-# Add Google Test
+-SET(GOOGLETEST_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+-INCLUDE("CMakeLists.txt.googletest")
++# GTest/GMock are supplied by Conan (test_requires) via CMakeDeps
++FIND_PACKAGE(GTest REQUIRED CONFIG)
++FIND_PACKAGE(keyple-util-cpp-lib REQUIRED CONFIG)
++FIND_PACKAGE(keyple-service-cpp-lib REQUIRED CONFIG)
+ 
+ TARGET_LINK_LIBRARIES(
+ 
+@@ -54,8 +55,10 @@ TARGET_LINK_LIBRARIES(
+ 
+     PRIVATE
+ 
+-    gtest
+-    gmock
++    GTest::gtest
++    GTest::gmock
+ 
+     Keyple::Card::Calypso
++    Keyple::Util
++    Keyple::Service
+ )

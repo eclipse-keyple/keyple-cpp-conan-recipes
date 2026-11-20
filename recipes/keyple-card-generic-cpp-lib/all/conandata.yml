@@ -1,0 +1,9 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/eclipse-keyple/keyple-card-generic-cpp-lib/archive/refs/tags/4.0.0.tar.gz"
+    sha256: "39a4249d64d8306679d7dadd2a87a16a6e6340e038ea17b8b64e8803adfc086d"
+patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0-0001-conan-support.patch"
+      patch_description: "Back-port Conan support (CMakeDeps deps, install rules, optional tests)"
+      patch_type: "conan"

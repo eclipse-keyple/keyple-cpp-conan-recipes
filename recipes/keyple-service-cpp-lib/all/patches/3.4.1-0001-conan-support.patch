@@ -1,0 +1,110 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dbc58cb..8140a40 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,13 +30,18 @@ SET(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
+ 
+ SET(CMAKE_MACOSX_RPATH 1)
+ SET(CMAKE_CXX_STANDARD 11)
++SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ # Compilers
+ SET(CMAKE_C_COMPILER_WORKS 1)
+ SET(CMAKE_CXX_COMPILER_WORKS 1)
+ 
+-IF(NOT TOOLCHAIN_FILE)
+-    MESSAGE(FATAL_ERROR "Toolchain file not specified")
++# Compiler warnings (compiler/OS selection itself is now handled by the
++# Conan profile passed at configure time, see profiles/).
++IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
++    ADD_COMPILE_OPTIONS(-Wall -Wextra -Wdeprecated -Wno-overloaded-virtual -pedantic -pedantic-errors -Werror)
++ELSEIF(MSVC)
++    ADD_COMPILE_OPTIONS(/W4 /WX /EHsc)
+ ENDIF()
+ 
+ # Set common output directory
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ac3c194..0443459 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -13,4 +13,9 @@
+ 
+ # Add projects
+ ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/main)
+-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/test)
++
++OPTION(BUILD_TESTING "Build the unit tests" ON)
++
++IF(BUILD_TESTING)
++    ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/test)
++ENDIF()
+diff --git a/src/main/CMakeLists.txt b/src/main/CMakeLists.txt
+index 9ccdb9d..4cee755 100644
+--- a/src/main/CMakeLists.txt
++++ b/src/main/CMakeLists.txt
+@@ -18,12 +18,12 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DKEYPLESERVICE_EXPORT")
+ 
+ FIND_PACKAGE(Threads REQUIRED)
+ 
+-# Include deps
+-INCLUDE("CMakeLists.txt.keyple-common")
+-INCLUDE("CMakeLists.txt.keyple-plugin")
+-INCLUDE("CMakeLists.txt.keyple-util")
+-INCLUDE("CMakeLists.txt.keypop-card")
+-INCLUDE("CMakeLists.txt.keypop-reader")
++# Dependencies are supplied by Conan (requires) via CMakeDeps
++FIND_PACKAGE(keyple-common-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keyple-plugin-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keyple-util-cpp-lib REQUIRED CONFIG)
++FIND_PACKAGE(keypop-card-cpp-api REQUIRED CONFIG)
++FIND_PACKAGE(keypop-reader-cpp-api REQUIRED CONFIG)
+ 
+ ADD_LIBRARY(
+ 
+@@ -103,3 +103,19 @@ ADD_LIBRARY(
+ 
+     ${LIBRARY_NAME}
+ )
++
++INSTALL(
++
++    TARGETS ${LIBRARY_NAME}
++
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin
++)
++
++INSTALL(
++
++    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
++
++    DESTINATION include
++)
+diff --git a/src/test/CMakeLists.txt b/src/test/CMakeLists.txt
+index fea589a..0adb1f3 100644
+--- a/src/test/CMakeLists.txt
++++ b/src/test/CMakeLists.txt
+@@ -51,17 +51,17 @@ TARGET_INCLUDE_DIRECTORIES(
+     ${CMAKE_CURRENT_SOURCE_DIR}
+ )
+ 
+-# Include deps
+-SET(GOOGLETEST_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+-INCLUDE("CMakeLists.txt.googletest")
++# GTest/GMock are supplied by Conan (test_requires) via CMakeDeps
++FIND_PACKAGE(GTest REQUIRED CONFIG)
++FIND_PACKAGE(keyple-util-cpp-lib REQUIRED CONFIG)
+ 
+ TARGET_LINK_LIBRARIES(
+     ${EXECTUABLE_NAME}
+ 
+     PUBLIC
+ 
+-    gtest
+-    gmock
++    GTest::gtest
++    GTest::gmock
+     Keyple::Service
+     Keyple::Util
+ )
