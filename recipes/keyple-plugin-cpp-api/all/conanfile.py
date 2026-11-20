@@ -1,0 +1,87 @@
+# *****************************************************************************
+# Copyright (c) 2025 Calypso Networks Association https://calypsonet.org/     *
+#                                                                             *
+# This program and the accompanying materials are made available under the    *
+# terms of the Eclipse Public License 2.0 which is available at               *
+# http://www.eclipse.org/legal/epl-2.0                                        *
+#                                                                             *
+# SPDX-License-Identifier: EPL-2.0                                            *
+# *****************************************************************************/
+
+import os
+
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+
+
+class KeyplePluginCppApiConan(ConanFile):
+    name = "keyple-plugin-cpp-api"
+    license = "EPL-2.0"
+    author = "Calypso Networks Association <https://calypsonet.org/>"
+    url = "https://github.com/eclipse-keyple/keyple-plugin-cpp-api"
+    homepage = "https://keyple.org/apis/core-layer/plugin-api/"
+    description = "C++ API defining the Eclipse Keyple plugin extension interfaces"
+    topics = ("keyple", "calypso")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    no_copy_source = True
+
+    options = {
+        "with_tests": [True, False]
+    }
+
+    default_options = {
+        "with_tests": False
+    }
+
+    def layout(self):
+        cmake_layout(self)
+
+    def requirements(self):
+        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+
+    def build_requirements(self):
+        if self.options.with_tests:
+            # 1.12.1 is the last GoogleTest release still compiling as C++11,
+            # matching this project's CMAKE_CXX_STANDARD.
+            self.test_requires("gtest/1.12.1")
+
+    def generate(self):
+        if self.options.with_tests:
+            tc = CMakeToolchain(self)
+            tc.variables["BUILD_TESTING"] = True
+            tc.generate()
+            CMakeDeps(self).generate()
+
+    def build(self):
+        if self.options.with_tests:
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
+            if can_run(self):
+                self.run(os.path.join(self.build_folder, "bin", "keypleplugincppapi_ut"))
+
+    def package(self):
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*.dox", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.set_property("cmake_file_name", "keyple-plugin-cpp-api")
+        self.cpp_info.set_property("cmake_target_name", "Keyple::Plugin")
+
+    def package_id(self):
+        self.info.clear()

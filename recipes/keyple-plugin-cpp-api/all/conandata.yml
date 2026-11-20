@@ -1,0 +1,4 @@
+sources:
+  "2.3.2":
+    url: "https://github.com/eclipse-keyple/keyple-plugin-cpp-api/archive/refs/tags/2.3.2.tar.gz"
+    sha256: "ff2ae1c3a4f756fc9bcd143bbf104d211cb97d55acd8fc338210a39206366362"

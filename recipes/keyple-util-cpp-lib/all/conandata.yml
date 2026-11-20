@@ -1,0 +1,9 @@
+sources:
+  "2.4.1":
+    url: "https://github.com/eclipse-keyple/keyple-util-cpp-lib/archive/refs/tags/2.4.1.tar.gz"
+    sha256: "8260a201ec16936ed066d215a5803a66310b081c5fd133463b46ff11ae23796d"
+patches:
+  "2.4.1":
+    - patch_file: "patches/2.4.1-0001-conan-support.patch"
+      patch_description: "Back-port Conan support (CMakeDeps deps, install rules, optional tests)"
+      patch_type: "conan"
