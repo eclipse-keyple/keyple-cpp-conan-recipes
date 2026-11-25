@@ -1,0 +1,4 @@
+test_package/build/
+CMakeUserPresets.json
+.DS_Store
+__pycache__/

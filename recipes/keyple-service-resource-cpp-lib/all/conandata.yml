@@ -1,0 +1,9 @@
+sources:
+  "3.1.1":
+    url: "https://github.com/eclipse-keyple/keyple-service-resource-cpp-lib/archive/refs/tags/3.1.1.tar.gz"
+    sha256: "4ccb1a09e68ece081e5d297d7e2f1fec57be4b99d6f86195c6ca6d60743aaf63"
+patches:
+  "3.1.1":
+    - patch_file: "patches/3.1.1-0001-conan-support.patch"
+      patch_description: "Back-port Conan support (CMakeDeps deps, install rules, optional tests)"
+      patch_type: "conan"

@@ -1,0 +1,9 @@
+sources:
+  "3.2.2":
+    url: "https://github.com/eclipse-keyple/keyple-card-calypso-cpp-lib/archive/refs/tags/3.2.2.tar.gz"
+    sha256: "2bc3ecd4a13e5e008b7849dfc19e2bd98d9b9ae2db0323579a2be634365f08f1"
+patches:
+  "3.2.2":
+    - patch_file: "patches/3.2.2-0001-conan-support.patch"
+      patch_description: "Back-port Conan support (CMakeDeps deps, install rules, optional tests)"
+      patch_type: "conan"
