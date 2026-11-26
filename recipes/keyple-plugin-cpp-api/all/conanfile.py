@@ -49,7 +49,7 @@ class KeyplePluginCppApiConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
 
     def build_requirements(self):
         if self.options.with_tests:
