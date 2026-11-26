@@ -56,10 +56,10 @@ class KeypleCardGenericCppLibConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keypop-card-cpp-api/2.0.1", transitive_headers=True)
-        self.requires("keypop-genericcard-cpp-api/1.0.0", transitive_headers=True)
-        self.requires("keyple-service-resource-cpp-lib/3.1.1", transitive_headers=True)
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+        self.requires("keypop-card-cpp-api/[~2.0.1]", transitive_headers=True)
+        self.requires("keypop-genericcard-cpp-api/[~1.0.0]", transitive_headers=True)
+        self.requires("keyple-service-resource-cpp-lib/[~3.1.1]", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

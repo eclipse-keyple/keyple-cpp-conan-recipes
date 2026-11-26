@@ -56,14 +56,14 @@ class KeypleServiceResourceCppLibConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keyple-service-cpp-lib/3.4.1", transitive_headers=True)
+        self.requires("keyple-service-cpp-lib/[~3.4.1]", transitive_headers=True)
         # keyple-service-cpp-lib is a shared library, so Conan does not
         # propagate its own dependencies' libs transitively by default (its
         # consumers are only expected to need the shared lib itself). This
         # package's own sources call directly into keyple-util symbols
         # (Logger, Pattern, Matcher, Assert), so it needs its own direct
         # requirement on it.
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
