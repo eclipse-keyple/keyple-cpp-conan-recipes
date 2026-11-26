@@ -29,12 +29,14 @@ class KeyplePluginPcscCppLibConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "with_tests": [True, False]
     }
 
     default_options = {
         "shared": True,
-        "fPIC": True
+        "fPIC": True,
+        "with_tests": False
     }
 
     def export_sources(self):
@@ -56,9 +58,9 @@ class KeyplePluginPcscCppLibConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keyple-common-cpp-api/2.0.2", transitive_headers=True)
-        self.requires("keyple-plugin-cpp-api/2.3.2", transitive_headers=True)
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+        self.requires("keyple-common-cpp-api/[~2.0.2]", transitive_headers=True)
+        self.requires("keyple-plugin-cpp-api/[~2.3.2]", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,3 +91,6 @@ class KeyplePluginPcscCppLibConan(ConanFile):
             self.cpp_info.frameworks = ["PCSC"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winscard"]
+
+    def package_id(self):
+        self.info.options.rm_safe("with_tests")
