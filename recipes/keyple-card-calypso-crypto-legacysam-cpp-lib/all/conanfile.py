@@ -60,15 +60,15 @@ class KeypleCardCalypsoCryptoLegacySamCppLibConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keyple-card-generic-cpp-lib/4.0.0", transitive_headers=True)
-        self.requires("keypop-calypso-card-cpp-api/2.2.0", transitive_headers=True)
-        self.requires("keypop-calypso-crypto-legacysam-cpp-api/1.0.0", transitive_headers=True)
-        self.requires("keypop-calypso-crypto-symmetric-cpp-api/0.1.1", transitive_headers=True)
+        self.requires("keyple-card-generic-cpp-lib/[~4.0.0]", transitive_headers=True)
+        self.requires("keypop-calypso-card-cpp-api/[~2.2.0]", transitive_headers=True)
+        self.requires("keypop-calypso-crypto-legacysam-cpp-api/[~1.0.0]", transitive_headers=True)
+        self.requires("keypop-calypso-crypto-symmetric-cpp-api/[>=0.1.1 <1.0.0]", transitive_headers=True)
         # keyple-card-generic-cpp-lib is a shared library, so Conan does not
         # propagate its own dependencies' libs transitively by default. This
         # package's own sources call directly into keyple-util symbols, so it
         # needs its own direct requirement on it.
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
 
     def build_requirements(self):
         if self.options.with_tests:

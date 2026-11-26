@@ -60,11 +60,11 @@ class KeypleServiceCppLibConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("keyple-common-cpp-api/2.0.2", transitive_headers=True)
-        self.requires("keyple-plugin-cpp-api/2.3.2", transitive_headers=True)
-        self.requires("keyple-util-cpp-lib/2.4.1", transitive_headers=True)
-        self.requires("keypop-card-cpp-api/2.0.1", transitive_headers=True)
-        self.requires("keypop-reader-cpp-api/2.1.0", transitive_headers=True)
+        self.requires("keyple-common-cpp-api/[~2.0.2]", transitive_headers=True)
+        self.requires("keyple-plugin-cpp-api/[~2.3.2]", transitive_headers=True)
+        self.requires("keyple-util-cpp-lib/[~2.4.1]", transitive_headers=True)
+        self.requires("keypop-card-cpp-api/[~2.0.1]", transitive_headers=True)
+        self.requires("keypop-reader-cpp-api/[~2.1.0]", transitive_headers=True)
 
     def build_requirements(self):
         if self.options.with_tests:
