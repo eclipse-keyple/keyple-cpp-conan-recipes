@@ -13,6 +13,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 
 
@@ -89,6 +90,8 @@ class KeypleCardCalypsoCppLibConan(ConanFile):
         tc.variables["BUILD_TESTING"] = bool(self.options.with_tests)
         tc.generate()
         CMakeDeps(self).generate()
+        if self.options.with_tests:
+            VirtualRunEnv(self).generate()
 
     def build(self):
         cmake = CMake(self)
@@ -99,7 +102,7 @@ class KeypleCardCalypsoCppLibConan(ConanFile):
             if self.settings.os == "Windows":
                 bin_dir = os.path.join(bin_dir, str(self.settings.build_type))
             bin_name = "keyplecardcalypso_ut.exe" if self.settings.os == "Windows" else "keyplecardcalypso_ut"
-            self.run(os.path.join(bin_dir, bin_name))
+            self.run(os.path.join(bin_dir, bin_name), env="conanrun")
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
